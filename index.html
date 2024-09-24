@@ -1,0 +1,160 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Kart Khecker</title>
+        <style>
+            body {
+                background-color: #121212;
+                color: #e0e0e0;
+                font-family: Arial, sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+            }
+
+            h1 {
+                margin-bottom: 20px;
+            }
+
+            .button-container {
+                position: relative;
+                display: inline-block;
+            }
+
+            button {
+                background-color: #1e88e5;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px 20px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+                font-size: 16px;
+            }
+
+            button:hover {
+                background-color: #2196f3;
+            }
+
+            .tooltip {
+                visibility: hidden;
+                width: 300px;
+                background-color: #333;
+                color: #fff;
+                text-align: center;
+                border-radius: 5px;
+                padding: 5px;
+                position: absolute;
+                z-index: 1;
+                bottom: 125%; /* Adjusts the tooltip position */
+                left: 50%;
+                transform: translateX(-50%);
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+
+            .button-container:hover .tooltip {
+                visibility: visible;
+                opacity: 1;
+            }
+
+            input[type="date"] {
+                background-color: #424242;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+                margin: 10px 0;
+            }
+
+            input[type="date"]:focus {
+                outline: none;
+                box-shadow: 0 0 5px #1e88e5;
+            }
+
+            #loading {
+                display: none;
+                font-weight: bold;
+                color: #1e88e5;
+            }
+
+            textarea {
+                background-color: #424242;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+                margin-top: 10px;
+                resize: none;
+                width: 100%;
+                max-width: 600px;
+            }
+
+            textarea:focus {
+                outline: none;
+                box-shadow: 0 0 5px #1e88e5;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>PowerPlay Bibra Lake Empty Slots Checker</h1>
+        <div class="button-container">
+            <button id="fetchButton">Fetch Available Times</button>
+            <div class="tooltip">
+                Slots less than 1 hour into the future are hidden. Call if you
+                want to book before then.
+            </div>
+        </div>
+        <input type="date" id="datePicker" min="2007-01-01" />
+        <div id="loading">Loading...</div>
+        <textarea id="results" rows="20" readonly></textarea>
+    </body>
+
+    <script>
+        document.getElementById("datePicker").valueAsDate = new Date();
+        document.getElementById("fetchButton").addEventListener("click", () => {
+            const loadingIndicator = document.getElementById("loading");
+            const resultsTextArea = document.getElementById("results");
+            const dateString = document.getElementById("datePicker").value; // get the inputted date
+            const targetDate = new Date("2007-01-01"); // calculate the days since this date for the api call
+            const inputDate = new Date(dateString);
+            const timeDifference = inputDate - targetDate; // difference in milliseconds
+            const daysDifference = Math.floor(
+                timeDifference / (1000 * 60 * 60 * 24),
+            ); // convert to days
+            resultsTextArea.value = ""; // Clear previous results
+            loadingIndicator.style.display = "block"; // Show loading indicator
+
+            // Use a CORS proxy service
+            fetch(
+                "https://api.allorigins.win/get?url=" +
+                    encodeURIComponent(
+                        "https://secure.meriq.com/powerplaybibralake/ajax/getavailabletimes.asp?date=" +
+                            daysDifference +
+                            "&lanes=8&races=1&length=15&adults=8&juniors=0&path=1&step=15",
+                    ),
+                {
+                    method: "GET",
+                },
+            )
+                .then((response) => response.json())
+                .then((data) => {
+                    resultsTextArea.value = data.contents
+                        .split("@")
+                        .map((item) => item.split("|")[1])
+                        .join("\n"); // Display fetched data and remove the ids and split on new lines
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    resultsTextArea.value = "Error fetching data";
+                })
+                .finally(() => {
+                    loadingIndicator.style.display = "none"; // Hide loading indicator
+                });
+        });
+    </script>
+</html>
