@@ -105,7 +105,7 @@
         <div class="button-container">
             <button id="fetchButton">Fetch Available Times</button>
             <div class="tooltip">
-                Slots less than 1 hour into the future are hidden. Call if you
+                Slots less than 1 hour into the future are hidden. Call 0862055045 you
                 want to book before then.
             </div>
         </div>
@@ -150,7 +150,7 @@
                 })
                 .catch((error) => {
                     console.error("Error:", error);
-                    resultsTextArea.value = "Error fetching data";
+                    resultsTextArea.value = "Error fetching data. Please click again until it works.";
                 })
                 .finally(() => {
                     loadingIndicator.style.display = "none"; // Hide loading indicator
